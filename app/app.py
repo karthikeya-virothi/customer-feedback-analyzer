@@ -19,14 +19,11 @@ st.markdown("### AI Sentiment Analysis Dashboard")
 @st.cache_resource
 def load_model():
 
-    model_name = "distilbert-base-uncased"
+    model_name = "cardiffnlp/twitter-roberta-base-sentiment"
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-    model = AutoModelForSequenceClassification.from_pretrained(
-        model_name,
-        num_labels=2
-    )
+    model = AutoModelForSequenceClassification.from_pretrained(model_name)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -37,24 +34,34 @@ def load_model():
 
 model, tokenizer, device = load_model()
 
+
+model, tokenizer, device = load_model()
+
 # -------------------------------
 # PREDICTION FUNCTION
 # -------------------------------
 def predict(text):
+
     inputs = tokenizer(
         text,
         return_tensors="pt",
         truncation=True,
-        padding=True
-    ).to(device)
+        padding=True,
+        max_length=128
+    )
+
+    inputs = {k: v.to(device) for k, v in inputs.items()}
 
     with torch.no_grad():
         outputs = model(**inputs)
 
-    probs = torch.softmax(outputs.logits, dim=1).cpu().numpy()[0]
+    probs = torch.softmax(outputs.logits, dim=1)[0]
+
+    probs = probs.cpu().numpy()
 
     labels = ["Negative 😡", "Neutral 😐", "Positive 😊"]
-    pred = labels[int(probs.argmax())]
+
+    pred = labels[probs.argmax()]
 
     return pred, probs
 
