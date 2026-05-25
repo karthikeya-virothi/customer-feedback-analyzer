@@ -1,0 +1,14 @@
+venv/
+__pycache__/
+.ipynb_checkpoints/
+logs/
+results/
+notebooks/results/
+data/
+
+*.csv
+*.pt
+*.pth
+*.bin
+*.dll
+*.safetensors
